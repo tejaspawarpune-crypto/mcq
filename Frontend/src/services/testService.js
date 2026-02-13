@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = "https://exam-portal-6o7g.onrender.com/api/tests/";
 
+const API_URL = process.env.REACT_APP_API_URL / api / tests;
 // Create a new test
 const createTest = async (testData, token) => {
   const config = {
@@ -16,18 +16,18 @@ const createTest = async (testData, token) => {
 
 // Get all tests
 const getTests = async (token) => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-  
-    const response = await axios.get(API_URL, config);
-    return response.data;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
 
+  const response = await axios.get(API_URL, config);
+  return response.data;
+};
 
-  // Get a single test by its ID
+
+// Get a single test by its ID
 const getTestById = async (testId, token) => {
   const config = {
     headers: {
@@ -65,16 +65,16 @@ const getTestResults = async (testId, token) => {
 
 // --- NEW FUNCTION TO DOWNLOAD RESULTS ---
 const downloadResults = async (testId, token) => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      responseType: 'blob', // This is crucial for handling file downloads
-    };
-    // This calls the new backend route: GET /api/tests/:id/results/download
-    const response = await axios.get(API_URL + testId + '/results/download', config);
-    return response.data; // The response data will be the Excel file itself
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    responseType: 'blob', // This is crucial for handling file downloads
   };
+  // This calls the new backend route: GET /api/tests/:id/results/download
+  const response = await axios.get(API_URL + testId + '/results/download', config);
+  return response.data; // The response data will be the Excel file itself
+};
 
 
 const testService = {

@@ -1,28 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check, X, User, Mail, Hash, ShieldAlert, UserCheck, UserX } from 'lucide-react';
+import toast from 'react-hot-toast';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminHeader from '../../components/AdminHeader';
 import teacherService from '../../services/teacherService';
 
-const adminName = "Admin";
-
-// --- ICONS ---
-const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>;
-const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
-
 const StudentApprovalCard = ({ student, onApprove, onReject }) => (
-    <motion.div layout initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -100, transition: { duration: 0.3 } }} className="bg-white rounded-2xl shadow-lg flex items-center justify-between p-6 border border-gray-200" >
+    <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-md transition-shadow"
+    >
         <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">{student.name.charAt(0)}</div>
+            <div className="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">
+                {student.name.charAt(0).toUpperCase()}
+            </div>
             <div>
-                <p className="font-bold text-gray-800">{student.name}</p>
-                <p className="text-sm text-gray-500">{student.email}</p>
-                <p className="text-sm text-gray-500 font-mono">{student.prn}</p>
+                <h3 className="font-bold text-gray-900 text-lg">{student.name}</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-gray-500 mt-1">
+                    <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5" />
+                        {student.email}
+                    </div>
+                    <div className="hidden sm:block w-1 h-1 rounded-full bg-gray-300"></div>
+                    <div className="flex items-center gap-1.5">
+                        <Hash className="w-3.5 h-3.5" />
+                        PRN: <span className="font-mono text-gray-700 font-medium">{student.prn}</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div className="flex gap-3">
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => onReject(student._id)} className="p-3 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"> <XIcon /> </motion.button>
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => onApprove(student._id)} className="p-3 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition"> <CheckIcon /> </motion.button>
+        <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onReject(student._id)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-semibold transition-colors border border-transparent hover:border-red-200"
+            >
+                <UserX className="w-4 h-4" />
+                Reject
+            </motion.button>
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onApprove(student._id)}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 text-white hover:bg-green-700 font-semibold shadow-lg shadow-green-200 transition-all hover:shadow-green-300"
+            >
+                <UserCheck className="w-4 h-4" />
+                Approve
+            </motion.button>
         </div>
     </motion.div>
 );
@@ -48,7 +77,7 @@ const StudentApprovalsPage = () => {
             }
             try {
                 const allStudents = await teacherService.getStudents(loggedInUser.token);
-                console.log('Data received from backend:', allStudents); 
+                // console.log('Data received from backend:', allStudents);
                 const filtered = allStudents.filter(student => student.status === 'pending');
                 setPendingStudents(filtered);
             } catch (err) {
@@ -61,56 +90,75 @@ const StudentApprovalsPage = () => {
         fetchPendingStudents();
     }, []);
 
-    // --- THIS IS THE NEW LOGIC ---
     const handleApprove = async (studentId) => {
         try {
             await teacherService.updateStudentStatus(studentId, 'approved', user.token);
             // If successful, remove the student from the list on the UI
             setPendingStudents(prevStudents => prevStudents.filter(student => student._id !== studentId));
+            toast.success('Student approved successfully');
         } catch (err) {
-            alert('Failed to approve student. Please try again.');
+            toast.error('Failed to approve student. Please try again.');
             console.error(err);
         }
     };
 
-    // --- THIS IS THE NEW LOGIC ---
     const handleReject = async (studentId) => {
         try {
             await teacherService.updateStudentStatus(studentId, 'rejected', user.token);
             // If successful, remove the student from the list on the UI
             setPendingStudents(prevStudents => prevStudents.filter(student => student._id !== studentId));
+            toast.success('Student rejected');
         } catch (err) {
-            alert('Failed to reject student. Please try again.');
+            toast.error('Failed to reject student. Please try again.');
             console.error(err);
         }
     };
 
-    // The rest of the component handles displaying the data
-    if (isLoading) { return <div className="p-8 text-center">Loading...</div>; }
-    if (error) { return <div className="p-8 text-center text-red-500">Error: {error}</div>; }
+    if (isLoading) { return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">Loading requests...</div>; }
+    if (error) { return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-red-500">Error: {error}</div>; }
 
     return (
-        <div className="bg-gray-50 font-sans flex">
+        <div className="bg-gray-50 font-sans flex min-h-screen">
             <AdminSidebar />
-            <div className="flex-1 ml-64 flex flex-col min-h-screen">
-                <AdminHeader adminName={adminName} />
+            <div className="flex-1 ml-64 flex flex-col">
+                <AdminHeader userName={user?.name || "Admin"} />
                 <main className="flex-1 mt-20 p-8 overflow-y-auto">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} >
-                        <div className="flex justify-between items-center mb-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="max-w-5xl mx-auto"
+                    >
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                             <div>
-                                <h2 className="text-3xl font-bold text-gray-800">Student Approval Requests</h2>
-                                <p className="text-gray-500 mt-1">Review and manage new student sign-ups.</p>
+                                <h2 className="text-3xl font-extrabold text-gray-800 tracking-tight">Student Approvals</h2>
+                                <p className="text-gray-500 mt-1">Review pending registration requests from students.</p>
                             </div>
-                            <div className="bg-yellow-100 text-yellow-800 font-bold text-lg px-4 py-2 rounded-full">{pendingStudents.length} Pending</div>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-700 rounded-full border border-yellow-200 shadow-sm">
+                                <ShieldAlert className="w-5 h-5" />
+                                <span className="font-bold">{pendingStudents.length}</span>
+                                <span className="font-medium">Pending Requests</span>
+                            </div>
                         </div>
+
                         <div className="space-y-4">
-                            <AnimatePresence>
+                            <AnimatePresence mode='popLayout'>
                                 {pendingStudents.length > 0 ? (
                                     pendingStudents.map((student) => (
                                         <StudentApprovalCard key={student._id} student={student} onApprove={handleApprove} onReject={handleReject} />
                                     ))
                                 ) : (
-                                    <div className="text-center py-12 bg-white rounded-2xl shadow-lg"><p className="text-gray-500 text-lg">No pending approvals.</p></div>
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="flex flex-col items-center justify-center py-16 bg-white rounded-3xl shadow-sm border border-gray-100 text-center"
+                                    >
+                                        <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-4">
+                                            <Check className="w-10 h-10" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">All Caught Up!</h3>
+                                        <p className="text-gray-500 max-w-sm mx-auto">There are no pending student approval requests at the moment.</p>
+                                    </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>

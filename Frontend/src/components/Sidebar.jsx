@@ -68,7 +68,7 @@ const Sidebar = () => {
             to="/profile"
             className={({ isActive }) => (isActive ? activeClass : inactiveClass)}
           >
-            <ProfileIcon /> <span>Profile</span>
+            <ProfileIcon /> <span>My Profile</span>
           </NavLink>
         </nav>
 

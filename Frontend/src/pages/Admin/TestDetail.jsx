@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CalendarDays, Clock, ListChecks, ArrowLeft, Trash, Edit, Users, Download } from 'lucide-react'; // Added Download icon
+import toast from 'react-hot-toast';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminHeader from '../../components/AdminHeader';
 import testService from '../../services/testService';
@@ -9,7 +10,7 @@ import testService from '../../services/testService';
 const TestDetail = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
-    
+
     const [test, setTest] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -46,7 +47,7 @@ const TestDetail = () => {
             try {
                 if (!user || !user.token) throw new Error("Authentication error");
                 await testService.deleteTestById(testId, user.token);
-                alert('Test deleted successfully!');
+                toast.success('Test deleted successfully!');
                 navigate('/admin/manage-tests'); // Navigate back to the list
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to delete the test.');
@@ -59,10 +60,10 @@ const TestDetail = () => {
         setIsDownloading(true);
         try {
             if (!user || !user.token) throw new Error("Authentication error");
-            
+
             // This calls the new function in your testService
             const blob = await testService.downloadResults(testId, user.token);
-            
+
             // Create a temporary link to trigger the browser's download prompt
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -76,7 +77,7 @@ const TestDetail = () => {
 
         } catch (err) {
             console.error("Download failed:", err);
-            alert("Failed to download results. Please try again.");
+            toast.error("Failed to download results. Please try again.");
         } finally {
             setIsDownloading(false);
         }
@@ -93,94 +94,169 @@ const TestDetail = () => {
     if (!test) return null;
 
     return (
-        <div className="bg-gray-100 font-sans flex min-h-screen">
+        <div className="bg-gray-50 font-sans flex min-h-screen">
             <AdminSidebar />
             <div className="flex-1 ml-64 flex flex-col">
-                <AdminHeader adminName={user?.name || 'Admin'} />
+                <AdminHeader userName={user?.name || 'Admin'} />
 
                 <main className="flex-1 mt-20 p-8 overflow-y-auto">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                        {/* Header Section */}
-                        <div className="flex justify-between items-center mb-10">
-                            <div>
-                                <button onClick={() => navigate(-1)} className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
-                                    <ArrowLeft className="w-5 h-5 mr-2" />
-                                    Back to Tests
-                                </button>
-                                <h2 className="text-4xl font-extrabold text-gray-800 mt-2">Test Details</h2>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="max-w-7xl mx-auto"
+                    >
+                        {/* Back Button */}
+                        <div className="mb-6">
+                            <button onClick={() => navigate(-1)} className="group flex items-center text-gray-500 hover:text-blue-600 transition-colors font-medium">
+                                <div className="p-2 rounded-full bg-white group-hover:bg-blue-50 mr-3 shadow-sm transition-colors">
+                                    <ArrowLeft className="w-5 h-5" />
+                                </div>
+                                Back to Tests
+                            </button>
+                        </div>
+
+                        {/* Hero Section */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl shadow-2xl p-8 mb-8 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-10 -mb-10 blur-xl"></div>
+
+                            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                                <div>
+                                    <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider mb-3">
+                                        TEST DETAILS
+                                    </div>
+                                    <h2 className="text-4xl font-extrabold tracking-tight mb-2">{test.name}</h2>
+                                    <div className="flex items-center gap-2 text-blue-100 items-center">
+                                        <span className="opacity-80">Created by</span>
+                                        <span className="font-semibold bg-white/10 px-2 py-0.5 rounded text-sm">{test.createdBy?.name || 'Admin'}</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center min-w-[100px] border border-white/10">
+                                        <div className="text-3xl font-bold">{test.questions.length}</div>
+                                        <div className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Questions</div>
+                                    </div>
+                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center min-w-[100px] border border-white/10">
+                                        <div className="text-3xl font-bold">100</div>
+                                        <div className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Marks</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Left Column: Test Info & Actions */}
-                            <div className="lg:col-span-1">
-                                <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-28">
-                                    <h3 className="text-2xl font-bold text-gray-900 truncate">{test.name}</h3>
-                                    <div className="mt-6 space-y-4 border-t pt-6">
-                                        <div className="flex items-center gap-3 text-gray-700">
-                                            <CalendarDays className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Left Column: Metadata & Actions */}
+                            <div className="lg:col-span-4 space-y-6">
+                                {/* Metadata Card */}
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                        <h3 className="font-bold text-gray-800">Test Configuration</h3>
+                                    </div>
+                                    <div className="p-6 space-y-6">
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
+                                                <CalendarDays className="w-6 h-6" />
+                                            </div>
                                             <div>
-                                                <p className="font-semibold">Date</p>
-                                                <p>{new Date(test.date).toLocaleDateString()}</p>
+                                                <p className="text-sm text-gray-500 font-medium">Scheduled Date</p>
+                                                <p className="text-lg font-bold text-gray-800">{new Date(test.date).toLocaleDateString('en-GB')}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 text-gray-700">
-                                            <Clock className="w-6 h-6 text-green-600 flex-shrink-0" />
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 rounded-xl bg-green-50 text-green-600">
+                                                <Clock className="w-6 h-6" />
+                                            </div>
                                             <div>
-                                                <p className="font-semibold">Time</p>
-                                                <p>{test.startTime} - {test.endTime}</p>
+                                                <p className="text-sm text-gray-500 font-medium">Time Window</p>
+                                                <p className="text-lg font-bold text-gray-800">{test.startTime} - {test.endTime}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 text-gray-700">
-                                            <ListChecks className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
+                                                <ListChecks className="w-6 h-6" />
+                                            </div>
                                             <div>
-                                                <p className="font-semibold">Total Questions</p>
-                                                <p>{test.questions.length}</p>
+                                                <p className="text-sm text-gray-500 font-medium">Question Set</p>
+                                                <p className="text-lg font-bold text-gray-800">{test.questions.length} items</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-8 border-t pt-6 space-y-3">
-                                        <button onClick={() => navigate(`/admin/test-results/${testId}`)} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition font-semibold">
-                                            <Users className="w-5 h-5" /> View Student Results
+                                </div>
+
+                                {/* Actions Card */}
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-28">
+                                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                        <h3 className="font-bold text-gray-800">Quick Actions</h3>
+                                    </div>
+                                    <div className="p-6 space-y-3">
+                                        <button onClick={() => navigate(`/admin/test-results/${testId}`)} className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-blue-50 text-gray-700 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all group font-medium">
+                                            <span className="flex items-center gap-3"><Users className="w-5 h-5 text-gray-400 group-hover:text-blue-500" /> Student Results</span>
+                                            <ArrowLeft className="w-4 h-4 rotate-180 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </button>
 
-                                        {/* --- NEW DOWNLOAD BUTTON --- */}
-                                        <button 
+                                        <button
                                             onClick={handleDownloadResults}
                                             disabled={isDownloading}
-                                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 transition font-semibold disabled:bg-green-400 disabled:cursor-not-allowed"
+                                            className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-green-50 text-gray-700 rounded-xl hover:border-green-500 hover:text-green-600 transition-all group font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            <Download className="w-5 h-5" />
-                                            {isDownloading ? 'Downloading...' : 'Download Results'}
+                                            <span className="flex items-center gap-3"><Download className="w-5 h-5 text-gray-400 group-hover:text-green-500" /> {isDownloading ? 'Downloading...' : 'Excel Report'}</span>
                                         </button>
-                                        
-                                        <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow-sm hover:bg-gray-300 transition font-semibold">
-                                            <Edit className="w-5 h-5" /> Edit Test
-                                        </button>
-                                        <button onClick={handleDeleteTest} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition font-semibold">
-                                            <Trash className="w-5 h-5" /> Delete Test
-                                        </button>
+
+                                        <div className="pt-4 mt-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+                                            <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">
+                                                <Edit className="w-4 h-4" /> Edit
+                                            </button>
+                                            <button onClick={handleDeleteTest} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition font-medium text-sm">
+                                                <Trash className="w-4 h-4" /> Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Column: Questions List */}
-                            <div className="lg:col-span-2">
-                                <div className="bg-white rounded-2xl shadow-lg p-8">
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-6">Questions & Answers</h3>
-                                    <div className="space-y-6">
+                            <div className="lg:col-span-8">
+                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                                    <div className="bg-gray-50 px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+                                        <h3 className="font-bold text-xl text-gray-800">Questions</h3>
+                                    </div>
+                                    <div className="p-8 space-y-8">
                                         {test.questions.map((q, idx) => (
-                                            <div key={q._id || idx} className="bg-gray-50 p-5 rounded-xl border">
-                                                <p className="font-semibold text-lg text-gray-800">Q{idx + 1}: {q.questionText}</p>
-                                                <ul className="mt-4 space-y-2">
-                                                    {q.options.map((opt, i) => (
-                                                        <li key={i} className={`flex items-center p-2 rounded-md text-gray-700 ${opt === q.correctAnswer ? 'bg-green-100 text-green-800 font-medium' : ''}`}>
-                                                            <span className="mr-3">{String.fromCharCode(65 + i)}.</span>
-                                                            <span>{opt}</span>
-                                                            {opt === q.correctAnswer && <span className="ml-auto text-xs font-bold">(Correct)</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                            <div key={q._id || idx} className="group">
+                                                <div className="flex gap-5">
+                                                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                        {idx + 1}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-lg font-medium text-gray-900 mb-4 leading-relaxed">{q.questionText}</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                            {q.options.map((opt, i) => (
+                                                                <div
+                                                                    key={i}
+                                                                    className={`relative px-4 py-3 rounded-lg border-2 transition-all ${opt === q.correctAnswer
+                                                                            ? 'bg-green-50 border-green-500 text-green-900 shadow-sm'
+                                                                            : 'bg-white border-gray-100 text-gray-600'
+                                                                        }`}
+                                                                >
+                                                                    <div className="flex items-center">
+                                                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${opt === q.correctAnswer ? 'bg-green-200 text-green-800' : 'bg-gray-100 text-gray-500'
+                                                                            }`}>
+                                                                            {String.fromCharCode(65 + i)}
+                                                                        </span>
+                                                                        <span className="font-medium">{opt}</span>
+                                                                        {opt === q.correctAnswer && (
+                                                                            <svg className="w-5 h-5 ml-auto text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                            </svg>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {idx !== test.questions.length - 1 && <div className="h-px bg-gray-100 w-full mt-8"></div>}
                                             </div>
                                         ))}
                                     </div>

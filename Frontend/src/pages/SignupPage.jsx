@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, FileText, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import authService from '../services/authService';
 import toast from 'react-hot-toast';
 
-// --- IMPORT YOUR LOGOS HERE ---
+// Use assets safely
 import companyLogo from '/assets/incronix.png';
 import collegeLogo from '/assets/INDIRA LOGO.png';
-
-// --- ICONS (Updated UserAddIcon color) ---
-const UserAddIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /> </svg>);
-const EyeIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /> </svg>);
-const EyeOffIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /> </svg>);
-
 
 const SignupPage = () => {
     const navigate = useNavigate();
@@ -33,6 +28,10 @@ const SignupPage = () => {
     const handleInputChange = (e) => {
         const { id, value } = e.target;
         setFormData({ ...formData, [id]: value });
+        // Clear specific error when user types
+        if (errors[id]) {
+            setErrors({ ...errors, [id]: '' });
+        }
     };
 
     const validate = () => {
@@ -59,11 +58,12 @@ const SignupPage = () => {
                 await authService.register({ name, email, prn, password });
 
                 toast.success('Registration successful! Please sign in.');
-                navigate('/');
+                navigate('/'); // Redirect to Login page (root path based on usage)
 
             } catch (error) {
                 const message = (error.response?.data?.message) || error.message || error.toString();
                 setApiError(message);
+                toast.error(message);
             } finally {
                 setIsLoading(false);
             }
@@ -71,47 +71,186 @@ const SignupPage = () => {
     };
 
     return (
-        <div className="flex min-h-screen w-full font-sans">
-            {/* --- DARK GRAY PART (LEFT SIDE) --- */}
-            <div className="hidden md:flex md:w-1/2 flex-col items-center justify-center bg-gray-800 p-12 text-white">
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                    className="text-center"
-                >
-                    {/* Incronix Logo */}
-                    <img src={companyLogo} alt="Incronix Logo" className="h-32 mx-auto mb-8" />
+        <div className="flex min-h-screen w-full font-sans bg-gray-50">
+            {/* Left Side - Brand & Info */}
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-12 flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
 
-                    {/* Join MCQ Master Text */}
-                    <h1 className="text-5xl font-bold">Join MCQ Master</h1>
-                    <p className="mt-4 text-lg opacity-90">Create your account to start taking tests.</p>
-                </motion.div>
+                <div className="relative z-10">
+                    <img src={companyLogo} alt="Incronix Logo" className="h-16 mb-8" />
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
+                            Join the <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">MCQ Master</span> Community
+                        </h1>
+                        <p className="text-xl text-gray-400 max-w-lg leading-relaxed">
+                            Create your account to start taking secure online examinations and tracking your progress naturally.
+                        </p>
+                    </motion.div>
+                </div>
+
+                <div className="relative z-10 text-gray-500 text-sm">
+                    © {new Date().getFullYear()} Incronix. All rights reserved.
+                </div>
             </div>
 
-            {/* --- WHITE PART (RIGHT SIDE) --- */}
-            <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-50 p-8 sm:p-12">
-                <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }} className="w-full max-w-sm" >
-
-                    {/* Indira Logo */}
-                    <div className="flex justify-center items-center mb-8">
-                        <img src={collegeLogo} alt="Indira College Logo" className="h-32" />
+            {/* Right Side - Signup Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white/50 backdrop-blur-sm overflow-y-auto">
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-full max-w-md my-8"
+                >
+                    <div className="text-center mb-8">
+                        <img src={collegeLogo} alt="College Logo" className="h-20 mx-auto mb-4" />
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
+                        <p className="text-gray-500">Register as a new student</p>
                     </div>
 
-                    <div className="flex items-center gap-4 mb-6">
-                        <UserAddIcon />
-                        <h2 className="text-3xl font-bold text-gray-800">Create Student Account</h2>
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                        <div> <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label> <input id="name" type="text" value={formData.name} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-gray-700 focus:ring-gray-700'}`} /> {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>} </div>
-                        <div> <label htmlFor="prn" className="block text-sm font-medium text-gray-700">PRN / Student ID</label> <input id="prn" type="text" value={formData.prn} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.prn ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-gray-700 focus:ring-gray-700'}`} /> {errors.prn && <p className="mt-1 text-xs text-red-600">{errors.prn}</p>} </div>
-                        <div> <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label> <input id="email" type="email" value={formData.email} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-gray-700 focus:ring-gray-700'}`} /> {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>} </div>
-                        <div> <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label> <div className="relative mt-1"> <input id="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange} className={`block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-gray-700 focus:ring-gray-700'}`} /> <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3"> {showPassword ? <EyeOffIcon /> : <EyeIcon />} </button> </div> {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>} </div>
-                        <div> <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label> <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange} className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm sm:text-sm ${errors.confirmPassword ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-gray-700 focus:ring-gray-700'}`} /> {errors.confirmPassword && <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>} </div>
-                        {apiError && (<div className="rounded-md bg-red-50 p-4"> <p className="text-sm font-medium text-red-800">{apiError}</p> </div>)}
-                        <div className="pt-2"> <button type="submit" disabled={isLoading} className="flex w-full justify-center rounded-md border border-transparent bg-gray-800 py-3 px-4 text-sm font-medium text-white shadow-sm transition-colors duration-300 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"> {isLoading ? 'Creating Account...' : 'Create Account'} </button> </div>
+                    {apiError && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-2"
+                        >
+                            <span className="block w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            {apiError}
+                        </motion.div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                        {/* Name Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-semibold text-gray-700 ml-1">Full Name</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                    <User className="w-5 h-5" />
+                                </div>
+                                <input
+                                    id="name"
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    className={`block w-full pl-10 pr-3 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.name ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                                    placeholder="John Doe"
+                                />
+                            </div>
+                            {errors.name && <p className="text-xs text-red-500 font-medium ml-1">{errors.name}</p>}
+                        </div>
+
+                        {/* PRN Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-semibold text-gray-700 ml-1">PRN / Student ID</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                    <FileText className="w-5 h-5" />
+                                </div>
+                                <input
+                                    id="prn"
+                                    type="text"
+                                    value={formData.prn}
+                                    onChange={handleInputChange}
+                                    className={`block w-full pl-10 pr-3 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.prn ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                                    placeholder="Enter your PRN"
+                                />
+                            </div>
+                            {errors.prn && <p className="text-xs text-red-500 font-medium ml-1">{errors.prn}</p>}
+                        </div>
+
+                        {/* Email Input */}
+                        <div className="space-y-1">
+                            <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                    <Mail className="w-5 h-5" />
+                                </div>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className={`block w-full pl-10 pr-3 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.email ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                                    placeholder="student@example.com"
+                                />
+                            </div>
+                            {errors.email && <p className="text-xs text-red-500 font-medium ml-1">{errors.email}</p>}
+                        </div>
+
+                        {/* Password Inputs Grid */}
+                        <div className="grid grid-cols-1 gap-5">
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                        <Lock className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        id="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        className={`block w-full pl-10 pr-10 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.password ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="Min 8 chars"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                {errors.password && <p className="text-xs text-red-500 font-medium ml-1">{errors.password}</p>}
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Confirm Password</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                        <Lock className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        id="confirmPassword"
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange}
+                                        className={`block w-full pl-10 pr-3 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.confirmPassword ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="Retype password"
+                                    />
+                                </div>
+                                {errors.confirmPassword && <p className="text-xs text-red-500 font-medium ml-1">{errors.confirmPassword}</p>}
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-gray-900 hover:bg-black text-white py-3.5 rounded-xl font-bold text-base shadow-lg shadow-gray-200 hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+                        >
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    Create Account <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
+                        </button>
                     </form>
-                    <p className="mt-8 text-center text-sm text-gray-600"> Already have an account?{' '} <Link to="/" className="font-medium text-gray-700 hover:text-gray-900"> Sign In </Link> </p>
+
+                    <div className="mt-8 text-center">
+                        <p className="text-gray-500 text-sm">
+                            Already have an account?{' '}
+                            <Link to="/" className="font-bold text-purple-600 hover:text-purple-700 hover:underline transition-all">
+                                Sign In
+                            </Link>
+                        </p>
+                    </div>
                 </motion.div>
             </div>
         </div>

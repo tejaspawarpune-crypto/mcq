@@ -1,8 +1,8 @@
 // In frontend/src/services/teacherService.js
 import axios from 'axios';
 
-// const API_URL = "https://exam-portal-6o7g.onrender.com/api/users/";
-const API_URL = 'http://localhost:5000/api/users/';
+
+const API_URL = `${import.meta.env.VITE_API_URL}/api/users/`;
 
 // Get all students (requires teacher token)
 const getStudents = async (token) => {
@@ -12,8 +12,8 @@ const getStudents = async (token) => {
     },
   };
 
-  const response = await axios.get(API_URL+'getStudents', config);
-  return response.data; 
+  const response = await axios.get(API_URL + 'getStudents', config);
+  return response.data;
 };
 
 // --- ADD THIS NEW FUNCTION ---
@@ -49,9 +49,9 @@ const deleteStudent = async (studentId, token) => {
 // Create a new teacher account
 const addTeacher = async (teacherData, token) => {
   const config = {
-      headers: {
-          Authorization: `Bearer ${token}`,
-      },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
 
   // This calls the backend route: POST /api/users/add-teacher

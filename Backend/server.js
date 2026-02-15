@@ -13,11 +13,11 @@ connectDB();
 
 const app = express();
 
+// Middleware
 app.use(cors());
-// 2. Allow the app to parse JSON data.
 app.use(express.json());
 
-// API routes
+// API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/submissions', submissionRoutes);
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/build')));
 
   app.get('*', (req, res) =>
-    res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'))
+    res.sendFile(path.resolve(__dirname, '../frontend/build/index.html'))
   );
 } else {
   app.get('/', (req, res) => {
@@ -35,7 +35,8 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-const PORT =  "0.0.0.0";
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT} 🔥`);
 });

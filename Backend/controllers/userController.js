@@ -1,5 +1,7 @@
 // In backend/controllers/userController.js
 
+
+
 const User = require('../models/User.js');
 const generateToken = require('../utils/generateToken.js');
 
@@ -80,7 +82,7 @@ const loginUser = async (req, res) => {
     }
   };
   
-//login teacher
+// login teacher
 // const loginTeacher = async (req, res) => {
 //   const { email, password } = req.body;
 //   try {
@@ -125,6 +127,8 @@ const loginTeacher = async (req, res) => {
       res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
+
+
 
 //get all students  
 const getStudents = async (req, res) => {

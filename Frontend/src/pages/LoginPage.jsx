@@ -7,8 +7,7 @@ import toast from 'react-hot-toast';
 import Footer from '../components/Footer';
 
 // Use assets safely
-import companyLogo from '/assets/incronix.png';
-import collegeLogo from '/assets/INDIRA LOGO.png';
+import collegeLogo from '/assets/iims logo.png';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -70,7 +69,7 @@ const LoginPage = () => {
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
 
                 <div className="relative z-10">
-                    <img src={companyLogo} alt="Incronix Logo" className="h-16 mb-8" />
+                    
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

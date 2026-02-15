@@ -6,8 +6,7 @@ import authService from '../services/authService';
 import toast from 'react-hot-toast';
 
 // Use assets safely
-import companyLogo from '/assets/incronix.png';
-import collegeLogo from '/assets/INDIRA LOGO.png';
+import collegeLogo from '/assets/iims logo.png';
 
 const SignupPage = () => {
     const navigate = useNavigate();
@@ -78,7 +77,7 @@ const SignupPage = () => {
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
 
                 <div className="relative z-10">
-                    <img src={companyLogo} alt="Incronix Logo" className="h-16 mb-8" />
+                    
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -138,7 +137,7 @@ const SignupPage = () => {
                                     value={formData.name}
                                     onChange={handleInputChange}
                                     className={`block w-full pl-10 pr-3 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 transition-all duration-200 outline-none ${errors.name ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' : ''}`}
-                                    placeholder="John Doe"
+                                    placeholder="First Name"
                                 />
                             </div>
                             {errors.name && <p className="text-xs text-red-500 font-medium ml-1">{errors.name}</p>}
